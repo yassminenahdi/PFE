@@ -1,0 +1,49 @@
+Rapport Technique : Intégration d’un Système de Détection de Fraude par Machine Learning dans une Passerelle de Paiement
+
+1. Introduction
+Ce rapport décrit l’intégration d’un système de détection de fraude basé sur l’intelligence artificielle (IA) dans une plateforme de paiement sécurisée. L’objectif est de renforcer la sécurité des transactions en identifiant et en bloquant automatiquement les opérations suspectes grâce à un modèle de machine learning.
+
+2. Architecture du Système
+- Backend : API REST Spring Boot (Java 17) pour la gestion des paiements et portefeuilles.
+- Frontend : Application Angular (non concernée par l’intégration ML).
+- Microservice ML : API Python Flask exposant un modèle scikit-learn entraîné pour la détection de fraude.
+- Modèle de données : Entités principales : WALLET, WALLET_OPERATIONS, CUSTOMER, OPERATION_TYPE.
+
+Flux d’intégration :
+1. L’utilisateur initie une transaction via le frontend ou l’API.
+2. Le backend vérifie les règles métier (plafonds, statut du portefeuille, etc.).
+3. Avant validation, le backend envoie les données de la transaction au microservice ML.
+4. Le microservice prédit si la transaction est frauduleuse.
+5. Si la transaction est suspecte, elle est bloquée et une erreur est retournée ; sinon, elle est validée.
+
+3. Détails de l’Implémentation
+3.1. Microservice Machine Learning
+- Modèle : RandomForestClassifier entraîné sur des données réalistes d’opérations de portefeuille.
+- API : Application Flask (fraud_api.py) exposant un endpoint /predict.
+- Entrée : JSON avec les caractéristiques de la transaction (montant, devise, statut, type de portefeuille, ID client, type d’opération).
+- Sortie : JSON indiquant le statut de fraude ({"fraud": 0} ou {"fraud": 1}).
+
+3.2. Intégration Backend
+- FraudDetectionService.java : Service Spring qui interroge l’API Python ML.
+- WalletOperationsServiceImp.java & WalletTransferServiceImpl.java : Avant chaque opération ou virement, ces services appellent le FraudDetectionService. Si la transaction est jugée frauduleuse, une exception est levée et l’opération est bloquée.
+
+3.3. Gestion des Erreurs
+- Si le service ML est indisponible, l’erreur est loggée mais la transaction n’est pas bloquée (comportement configurable).
+- Toutes les autres règles métier restent inchangées.
+
+4. Tests & Résultats
+- Build : Le backend compile sans erreur (mvn clean install).
+- Cas de test :
+  - Les transactions normales sont validées si non détectées comme fraude.
+  - Les transactions suspectes (selon le modèle ML) sont bloquées avec un message d’erreur explicite.
+  - Les transactions dépassant les plafonds sont bloquées par la logique métier avant le contrôle ML.
+- Validation : Les logs et réponses API confirment le bon fonctionnement de l’intégration.
+
+5. Conclusion
+Le système de détection de fraude par ML est désormais intégré et opérationnel dans la passerelle de paiement. Il ajoute une couche de sécurité supplémentaire en bloquant en temps réel les transactions suspectes, sans perturber la logique métier existante.
+
+Améliorations futures :
+- Réentraîner le modèle ML avec plus de données pour améliorer la précision.
+- Ajouter des notifications utilisateurs ou alertes administrateur en cas de fraude.
+- Suivre et analyser les prédictions ML pour améliorer le système.
+

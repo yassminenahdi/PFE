@@ -1,0 +1,61 @@
+# Exemples de diagrammes pour le rapport PFE
+
+---
+
+## 1. Diagramme d’architecture globale
+
+[Utilisateur]
+     |
+     v
+[Frontend Angular] <----> [Backend Spring Boot] <----> [Microservice ML (Python/Flask)]
+                                         |
+                                         v
+                                 [Base de données]
+
+---
+
+## 2. Diagramme de séquence (flux d’une transaction)
+
+Utilisateur -> Frontend : Saisie de la transaction
+Frontend -> Backend : Envoi des données de transaction
+Backend -> Microservice ML : Requête de prédiction de fraude
+Microservice ML -> Backend : Réponse (fraude ou non)
+Backend -> Base de données : Enregistrement du log de fraude si nécessaire
+Backend -> Frontend : Retour du résultat à l’utilisateur/admin
+
+---
+
+## 3. Diagramme de classes (exemple simplifié)
+
++------------------+      +------------------+
+|   WalletOperation|<>----|    FRAUD_LOG     |
++------------------+      +------------------+
+| amount           |      | id               |
+| currency         |      | transactionId    |
+| walletType       |      | date             |
+| customerId       |      | reason           |
+| operationType    |      | ...              |
+| status           |      +------------------+
++------------------+
+
+---
+
+## 4. Diagramme de flux de données
+
+[Frontend] --> [Backend] --> [Microservice ML]
+      ^             |              |
+      |             v              v
+[Dashboard Admin] [Base de données] 
+
+---
+
+## 5. Diagramme de processus ML
+
+[Collecte des données] --> [Préparation des données] --> [Entraînement du modèle]
+        |                        |                             |
+        v                        v                             v
+[wallet_operations_sample.csv] [Encodage, nettoyage]   [Random Forest, SHAP]
+
+---
+
+Ces exemples peuvent être reproduits graphiquement avec draw.io, Lucidchart, ou tout autre outil de diagramme. Tu peux aussi les adapter selon les spécificités de ton projet.
